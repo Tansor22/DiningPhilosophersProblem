@@ -3,7 +3,7 @@ package philosophers;
 public class Pythagorean extends Philosopher {
     @Override
     protected int[] forks() {
-        return new int[] {4,5};
+        return new int[] {3,4};
     }
 
     @Override

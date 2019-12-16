@@ -23,6 +23,20 @@ public class Utils {
         sleep(seconds);
     }
 
+    public static void sleepForAWhile(String message) {
+        // 2 secs max
+        double secs = Math.random() * 2;
+        say(message);
+        sleep(secs);
+    }
+
+    public static void sleepForAWhile(String message, int indentSize) {
+        // 2 secs max
+        double secs = Math.random() * 2;
+        say(message, indentSize);
+        sleep(secs);
+    }
+
     public static void say(String message) {
         say(message, 0);
     }

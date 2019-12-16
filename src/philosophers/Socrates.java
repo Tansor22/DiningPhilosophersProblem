@@ -3,7 +3,7 @@ package philosophers;
 public class Socrates extends Philosopher{
     @Override
     protected int[] forks() {
-        return new int[] {2, 3};
+        return new int[] {1, 2};
     }
 
     @Override
