@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Utils {
+public class ConcurrencyUtils {
     public static void sleep(double seconds) {
         Function<Double, Long> secondsConverter = doubleSeconds -> (long) (doubleSeconds * 1000);
         try {
@@ -25,7 +25,7 @@ public class Utils {
 
     public static void sleepForAWhile(String message) {
         // 2 secs max
-        double secs = Math.random() * 2;
+        double secs = Math.random() * 3;
         say(message);
         sleep(secs);
     }
