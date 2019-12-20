@@ -25,17 +25,29 @@ public class ConcurrencyUtils {
 
     public static void sleepForAWhile(String message) {
         // 2 secs max
-        double secs = Math.random() * 3;
+        sleepForAWhile(message, 2.5);
+    }
+
+    public static void sleepForAWhile(String message, double maxSecs) {
+        // 2 secs max
+        double secs = Math.random() * maxSecs;
         say(message);
         sleep(secs);
     }
 
     public static void sleepForAWhile(String message, int indentSize) {
         // 2 secs max
-        double secs = Math.random() * 2;
+        double secs = Math.random() * 2.5;
         say(message, indentSize);
         sleep(secs);
     }
+
+    public static void sleepForAWhile(String message, int indentSize, double maxSecs) {
+        // 2 secs max
+        say(message, indentSize);
+        sleepForAWhile(message, maxSecs);
+    }
+
 
     public static void say(String message) {
         say(message, 0);

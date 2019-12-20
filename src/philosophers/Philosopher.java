@@ -18,7 +18,7 @@ public abstract class Philosopher {
     private int counter;
 
     protected int limit() {
-        return 10;
+        return 5;
     }
 
     // initialize
@@ -38,55 +38,51 @@ public abstract class Philosopher {
         return nums;
     }
 
-    private void sendTake(Socket socket, int desiredFork) {
+    private String sendTake(Socket socket, int desiredFork) throws Exception {
         Message mes = new Message(TAKE, name(), desiredFork);
-        ObjectOutputStream out = out(socket);
-        // TODO should use serverSocket.accept ??? AND THE ANSWER IS ... YES
         String response;
-        do {
-            send(out, mes.toString());
-            ObjectInputStream in = in(socket);
-            try {
-                out.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            response = receive(in);
-            if (TAKEN.equals(response))
-                sleepForAWhile("Fork " + pretty(desiredFork) + " is occupied. So, I have to wait for it ro release...");
-            try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        while (TAKEN.equals(response));
-        try {
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ObjectInputStream in;
+        ObjectOutputStream out;
+
+        out = out(socket);
+        send(out, mes.toString());
+
+        in = in(socket);
+        response = receive(in);
+
+        out.close();
+        in.close();
+        return response;
+
     }
 
-    protected void takeForks() {
+    protected void takeForks() throws Exception {
         int[] forks = forks();
 
         // first need to take fork with lowest id
-        Socket waiter = getSocket(Waiter.PORT);
+        Socket waiter;
+        String response;
         // try to capture first fork
         int first = min(forks);
         say("Trying to capture " + pretty(first) + " fork...");
-        sendTake(waiter, first);
-        try {
-            waiter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        do {
+            waiter = getSocket(Waiter.PORT);
+            response = sendTake(waiter, first);
+            if (TAKEN.equals(response))
+                sleepForAWhile("Fork " + pretty(first) + " is occupied. So, I have to wait for it ro release...");
         }
-        waiter = getSocket(Waiter.PORT);
+        while (TAKEN.equals(response));
+
         // try to capture second fork
         int second = max(forks);
         say("Trying to capture " + pretty(second) + " fork...");
-        sendTake(waiter, second);
+        do {
+            waiter = getSocket(Waiter.PORT);
+            response = sendTake(waiter, second);
+            if (TAKEN.equals(response))
+                sleepForAWhile("Fork " + pretty(second) + " is occupied. So, I have to wait for it ro release...");
+        }
+        while (TAKEN.equals(response));
     }
 
     private int min(int... args) {
@@ -105,51 +101,47 @@ public abstract class Philosopher {
         return max;
     }
 
-    protected void releaseForks() {
+    protected void releaseForks() throws Exception {
         int[] forks = forks();
-
+        String response;
 
         // first need to release fork with highest id
-        Socket waiter = getSocket(Waiter.PORT);
+        Socket waiter;
 
         // releasing first fork
         int first = max(forks);
         say("Giving back " + pretty(first) + " fork...");
-        sendGiveBack(waiter, first);
+        do {
+            waiter = getSocket(Waiter.PORT);
+            response = sendGiveBack(waiter, first);
+        } while (UNEXPECTED.equals(response));
 
-        try {
-            waiter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        waiter = getSocket(Waiter.PORT);
+
         // releasing second fork
         int second = min(forks);
         say("Giving back " + pretty(second) + " fork...");
-        sendGiveBack(waiter, second);
+        do {
+            waiter = getSocket(Waiter.PORT);
+            response = sendGiveBack(waiter, second);
+        } while (UNEXPECTED.equals(response));
     }
 
-    private void sendGiveBack(Socket socket, int desiredFork) {
+    private String sendGiveBack(Socket socket, int desiredFork) throws Exception {
         Message mes = new Message(GIVE_BACK, name(), desiredFork);
-        ObjectOutputStream out = out(socket);
         String response;
-        do {
-            send(out, mes.toString());
-            ObjectInputStream in = in(socket);
-            response = receive(in);
-            sleepForAWhile("Fork " + pretty(desiredFork) + " has been released!");
-            try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        while (UNEXPECTED.equals(response));
-        try {
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ObjectOutputStream out;
+        ObjectInputStream in;
+
+        out = out(socket);
+        send(out, mes.toString());
+
+        in = in(socket);
+        response = receive(in);
+
+        out.close();
+        in.close();
+        return response;
+
     }
 
     private void greet() {
@@ -157,7 +149,7 @@ public abstract class Philosopher {
                 " I will use " + Arrays.toString(pretty(forks())) + " forks.");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Philosopher philosopher = PhilosophersFabric.of(args[0]);
         philosopher.init();
         philosopher.greet();
@@ -166,15 +158,16 @@ public abstract class Philosopher {
             philosopher.think();
             philosopher.eat();
             philosopher.releaseForks();
-            say("I'am done here! For a while...");
+            sleepForAWhile("I'am done here! For a while...", 3.0);
+            philosopher.counter++;
         }
     }
 
     protected void eat() {
-        sleepForAWhile("Let me eat...", 2);
+        sleepForAWhile("Let me eat...", 2, 1.0);
     }
 
     protected void think() {
-        sleepForAWhile("Let me think...", 1);
+        sleepForAWhile("Let me think...", 1, 3.0);
     }
 }

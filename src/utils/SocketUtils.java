@@ -23,6 +23,7 @@ public class SocketUtils {
     public static void send(ObjectOutputStream out, String data) {
         try {
             out.writeObject(data);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

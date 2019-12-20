@@ -22,7 +22,7 @@ public class Waiter {
 
     protected static List<Message> REQUESTS = new ArrayList<>();
 
-    public static final int PORT = 9856;
+    public static final int PORT = 9876;
 
 
     public static void main(String[] args) throws IOException {

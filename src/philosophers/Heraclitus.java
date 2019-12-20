@@ -13,6 +13,6 @@ public class Heraclitus extends Philosopher {
 
     @Override
     protected int limit() {
-        return 20;
+        return 3;
     }
 }
